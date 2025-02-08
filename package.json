@@ -2,6 +2,7 @@
   "name": "@chimp-gateway/fetch",
   "version": "0.1.0",
   "module": "src/index.ts",
+  "types": "src/index.d.ts",
   "devDependencies": {
     "bun-types": "latest"
   },
