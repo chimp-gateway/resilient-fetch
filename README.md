@@ -52,20 +52,27 @@ try {
 
 ### Retry
 
-Automatically retries failed requests with exponential backoff.
+Automatically retries failed requests with exponential backoff and optional jitter.
 
 ```typescript
 const { fetch } = createFetchClient({
   retry: {
     maxRetries: 3, // maximum number of retries
     delay: 1000, // initial delay between retries (ms)
+    jitterFactor: 0.1 // adds randomized delay variation (optional, defaults to 0.1)
   },
 });
 ```
 
+The retry policy implements exponential backoff with jitter to prevent thundering herd problems. The delay between retries increases exponentially, and a random jitter is added to spread out retry attempts.
+
 ### Circuit Breaker
 
-Prevents cascading failures by stopping requests when the system is under stress.
+Prevents cascading failures by stopping requests when the system is under stress. The circuit breaker has three states:
+
+- CLOSED: Normal operation, requests are allowed through
+- OPEN: After reaching failure threshold, stops all requests
+- HALF-OPEN: After recovery timeout, allows one test request to check if service has recovered
 
 ```typescript
 const { fetch } = createFetchClient({
@@ -76,9 +83,11 @@ const { fetch } = createFetchClient({
 });
 ```
 
+When in OPEN state, all requests immediately fail with a "Circuit breaker is open" error. After the recoveryTimeout period, the circuit goes into HALF-OPEN state and allows one request through. If this request succeeds, the circuit returns to CLOSED state; if it fails, the circuit opens again.
+
 ### Timeout
 
-Cancels requests that take too long to respond.
+Cancels requests that take too long to respond. Has special handling for fetch operations to properly abort them using AbortController.
 
 ```typescript
 const { fetch } = createFetchClient({
@@ -87,6 +96,8 @@ const { fetch } = createFetchClient({
   },
 });
 ```
+
+If a request exceeds the timeout, it will be aborted and throw an error with the message "Operation timed out after {timeout}ms". For fetch operations, this properly cancels the underlying network request.
 
 ## Combining Patterns
 
@@ -112,9 +123,9 @@ const { fetch } = createFetchClient({
 
 Patterns are applied in the following order:
 
-1. Retry (attempts)
-2. Circuit Breaker (failure prevention)
-3. Timeout (time limiting)
+1. Circuit Breaker (failure prevention)
+2. Timeout (time limiting)
+3. Retry (attempts)
 
 ## Types
 
@@ -126,6 +137,7 @@ import type {
   RetryOptions,
   CircuitBreakerOptions,
   TimeoutOptions,
+  CircuitState,
 } from "@chimp-gateway/fetch";
 ```
 
@@ -137,9 +149,9 @@ The library uses standard fetch Response and Error objects, with additional cont
 try {
   const response = await fetch("https://api.example.com/data");
 } catch (error) {
-  if (error.message === "Circuit breaker is open") {
+  if (error.message.includes("Circuit breaker is open")) {
     // Handle circuit breaker error
-  } else if (error.message === "Request timed out") {
+  } else if (error.message.includes("Operation timed out after")) {
     // Handle timeout error
   } else {
     // Handle other errors

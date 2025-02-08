@@ -34,16 +34,19 @@ export class CircuitBreaker {
   }
 
   private openCircuit(): void {
+    console.log("Opening circuit");
     this.state = "OPEN";
     this.nextAttempt = Date.now() + this.options.recoveryTimeout;
   }
 
   private closeCircuit(): void {
+    console.log("Closing circuit");
     this.state = "CLOSED";
     this.failureCount = 0;
   }
 
   private halfOpenCircuit(): void {
+    console.log("Half-open circuit");
     this.state = "HALF_OPEN";
   }
 }

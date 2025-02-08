@@ -28,11 +28,8 @@ export class ResilientFetchService implements ResilientFetchClient {
       return await fetch(input, { ...init });
     };
 
-    if (this.retryPolicy) {
-      const retryOperation = operation;
-      operation = () => this.retryPolicy!.execute(retryOperation);
-    }
-
+    // Apply patterns in order: Circuit Breaker -> Timeout -> Retry
+    // Circuit breaker should be first to prevent unnecessary calls when circuit is open
     if (this.circuitBreaker) {
       const circuitOperation = operation;
       operation = () => this.circuitBreaker!.execute(circuitOperation);
@@ -41,6 +38,11 @@ export class ResilientFetchService implements ResilientFetchClient {
     if (this.timeoutPolicy) {
       const timeoutOperation = operation;
       operation = () => this.timeoutPolicy!.execute(timeoutOperation);
+    }
+
+    if (this.retryPolicy) {
+      const retryOperation = operation;
+      operation = () => this.retryPolicy!.execute(retryOperation);
     }
 
     return await operation();
