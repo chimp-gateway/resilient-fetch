@@ -1,29 +1,29 @@
-# @resilient/fetch
+# @chimp-gateway/fetch
 
 A TypeScript-first HTTP client with built-in resilience patterns including retry, circuit breaker, and timeout. Drop-in replacement for the native fetch API.
 
-## Why @resilient/fetch?
+## Why @chimp-gateway/fetch?
 
 - 🔄 **Drop-in Replacement**: Uses the same API as native `fetch`
 - 🛡️ **Built-in Resilience**: Retry, circuit breaker, and timeout patterns
 - 📦 **Zero Dependencies**: Lightweight and efficient
 - 🔍 **Type Safe**: Written in TypeScript with full type support
-- 🪶 **Minimal Learning Curve**: If you know `fetch`, you know `@resilient/fetch`
+- 🪶 **Minimal Learning Curve**: If you know `fetch`, you know `@chimp-gateway/fetch`
 
 ## Installation
 
 ```bash
-npm install @resilient/fetch
+npm install @chimp-gateway/fetch
 # or
-yarn add @resilient/fetch
+yarn add @chimp-gateway/fetch
 # or
-bun add @resilient/fetch
+bun add @chimp-gateway/fetch
 ```
 
 ## Basic Usage
 
 ```typescript
-import { createFetchClient } from "@resilient/fetch";
+import { createFetchClient } from "@chimp-gateway/fetch";
 
 const { fetch } = createFetchClient({
   retry: {
@@ -126,7 +126,7 @@ import type {
   RetryOptions,
   CircuitBreakerOptions,
   TimeoutOptions,
-} from "@resilient/fetch";
+} from "@chimp-gateway/fetch";
 ```
 
 ## Error Handling
